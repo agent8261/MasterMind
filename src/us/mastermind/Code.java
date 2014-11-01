@@ -30,8 +30,13 @@ public class Code
   
   public static enum Color
   {
-    RED(0, 'r'), BLUE(1, 'b'), YELLOW(2, 'y'), GREEN(3, 'g'), 
-    WHITE(4, 'w'), ORANGE(5, 'o'), NONE(-1, '-');
+    RED(0, 'r'), 
+    BLUE(1, 'b'), 
+    YELLOW(2, 'y'), 
+    GREEN(3, 'g'), 
+    WHITE(4, 'w'), 
+    ORANGE(5, 'o'), 
+    NONE(-1, '-');
     
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -53,6 +58,20 @@ public class Code
     {
       return c;
     }
+    
+    public static String toString(final Color c)
+    {
+      switch(c)
+      {
+        case RED:    return "Red";
+        case BLUE:   return "Blue";
+        case YELLOW: return "Yellow";
+        case GREEN:  return "Green";
+        case WHITE:  return "White";
+        case ORANGE: return "Orange";
+        default:     return null;
+      }
+    }
   } // Color
   
   // ===========================================================================
@@ -60,7 +79,7 @@ public class Code
   
   public static class Pegs
   {
-    Color [] colors = new Color[NUM_PEGS];
+    public final Color [] colors = new Color[NUM_PEGS];
     
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -118,7 +137,7 @@ public class Code
       assert(correct >= 0 && correct <= NUM_PEGS);
       return correct;
     }
-  } // stats
+  } // Stats
   
   // ===========================================================================
   // ===========================================================================

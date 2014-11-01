@@ -1,27 +1,31 @@
-package us.mastermind;
+package us.mastermind.view;
 
 import java.awt.BorderLayout;
 
 import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import us.mastermind.MasterMind_AppController;
+import us.mastermind.RoundResultPanel;
+import us.mastermind.Code.Pegs;
+import us.mastermind.Code.Result;
 
 public class ViewMasterMind extends JPanel
 {
   private static final long serialVersionUID = 548894285026742559L;
-  static final String coreFrameTitleTxt = "Master Mind";
+  
   static final int NUM_ROUNDS = 12;
   
   JPanel roundPanel = new JPanel();
   BorderLayout layout = new BorderLayout();
   BoxLayout roundLayout = new BoxLayout(roundPanel, BoxLayout.PAGE_AXIS);
   RoundResultPanel roundResultPanels[] = new RoundResultPanel[NUM_ROUNDS];
-  GuessControlPanel guessControlPanel = new GuessControlPanel();
+  public final GuessControlPanel guessControlPanel = new GuessControlPanel();
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
-  public ViewMasterMind()
+  public ViewMasterMind(MasterMind_AppController appCtrl)
   {
     super();
     setLayout(layout);
@@ -34,26 +38,25 @@ public class ViewMasterMind extends JPanel
       roundResultPanels[i].setRoundNumber(i + 1);
       roundPanel.add(roundResultPanels[i]);
     }
+    
     add(guessControlPanel, BorderLayout.SOUTH);
-  }
-  
-  // ---------------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  
-  static class Runner implements Runnable
-  {
-    @Override
-    public void run()
-    {
-      JFrame coreFrame = new JFrame(coreFrameTitleTxt);
-      coreFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      
-      ViewMasterMind view = new ViewMasterMind();
-      coreFrame.add(view);
-      coreFrame.pack();
-      coreFrame.setVisible(true);
-    }
+    guessControlPanel.setActionListener(appCtrl.actListener);
     
   }
+  
+  public void setResult(int round, Pegs guess, Result r)
+  {
+    if((round < 0) || (round >= NUM_ROUNDS))
+    { return; }
+    
+    roundResultPanels[round].setResult(guess, r);
+  }
+  
+  public void reset()
+  {
+    for(int i=0; i < NUM_ROUNDS; i++)
+    { roundResultPanels[i].reset(); }
+  }
+  
   // ---------------------------------------------------------------------------
 }

@@ -1,32 +1,134 @@
 package us.mastermind;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import us.mastermind.Code.*;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
-public class MasterMind
+import us.mastermind.Code.*;
+import us.mastermind.view.GameMenu;
+import us.mastermind.view.ViewMasterMind;
+
+public class MasterMind_AppController
 {
+  
+  public static void main(String [] args)
+  {
+    final MasterMind_AppController ctrl = new MasterMind_AppController();
+    Runnable viewRunner = new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        ctrl.coreFrame = new JFrame(coreFrameTitleTxt);
+        ctrl.coreFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        ctrl.gameMenu = new GameMenu();
+        ctrl.coreFrame.setJMenuBar(ctrl.gameMenu.menubar);
+        ctrl.gameMenu.menuItem.addActionListener(ctrl.actListener);
+        
+        ctrl.viewMasterMind = new ViewMasterMind(ctrl);
+        ctrl.coreFrame.add(ctrl.viewMasterMind);
+        ctrl.coreFrame.pack();
+        ctrl.coreFrame.setVisible(true);
+      }
+    };
+    
+    javax.swing.SwingUtilities.invokeLater(viewRunner);
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
   private static final int NUM_PEGS = 4;
   private static final int NUM_TURNS = 2;
+  
+  static final String coreFrameTitleTxt = "Master Mind";
+  
+  public static final String SUBMIT_GUESS = "submitGuess";
+  public static final String NEW_GAME = "newGame";
   
   static final String PEG_REG_EX = "[rbygwo]";
   static final Pattern PEG_PATTERN = Pattern.compile(PEG_REG_EX);
   
-  // ---------------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
+  boolean hasGameStarted = false;
   
-  public static void main(String [] args)
+  Code currentCode = null;
+  int currentTurn = -1;
+  
+  JFrame coreFrame = null;
+  ViewMasterMind viewMasterMind = null;
+  GameMenu gameMenu = null;
+  
+  private MasterMind_AppController(){}
+  
+  public final ActionListener actListener = new ActionListener()
+  { @Override
+    public void actionPerformed(ActionEvent e)
+    {
+      final String s = e.getActionCommand();
+      if(s == null)
+      { return; }
+      
+      switch(s)
+      {
+        case SUBMIT_GUESS:
+          evaluateGuess();
+          break;
+        case NEW_GAME:
+          startGame();
+          break;
+        default:
+          break;
+      }
+    }
+  };
+  
+  void startGame()
   {
-    ViewMasterMind.Runner runner = new ViewMasterMind.Runner();
-    javax.swing.SwingUtilities.invokeLater(runner);
-    //MasterMind m = new MasterMind();
-    //m.startGame();
+    hasGameStarted = true;
+    currentCode = new Code();
+    currentTurn = 0;
+    viewMasterMind.reset();
+  }
+  
+  void evaluateGuess()
+  {
+    if(!hasGameStarted)
+    { return; }
+    
+    Pegs g = viewMasterMind.guessControlPanel.getGuess();
+    Code.Result r = evalGuess(currentCode, g);
+    viewMasterMind.setResult(currentTurn, g, r);
+    ++currentTurn;
+    
+    if(r.numCorrectPos == NUM_PEGS)
+    {
+      JOptionPane.showMessageDialog(coreFrame, "You win!");
+    }
+    else
+    {
+      if(!(currentTurn < NUM_TURNS))
+      {
+        hasGameStarted = false;
+        JOptionPane.showMessageDialog(coreFrame, 
+          String.format("You Lose!\nThe correct code was %s", currentCode.code.toString()));
+      }
+      else
+      {
+        JOptionPane.showMessageDialog
+        (coreFrame, 
+         String.format("Try to guess again.\n%d guesses left", NUM_TURNS - (currentTurn + 1)));
+      }
+    }
   }
   
   // ---------------------------------------------------------------------------
   
-  void startGame()
+  void oldstartGame()
   {
     Code code = new Code();
     boolean won = false;
